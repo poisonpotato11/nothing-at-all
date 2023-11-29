@@ -115,7 +115,7 @@
 
             // Update camera position to follow the player
             camera.position.x += (player.position.x - camera.position.x) * 0.05;
-            camera.position.z += (player.position.z + 5 - camera.position.z) * 0.05;
+            camera.position.z += (player.position.z + 10 - camera.position.z) * 0.05; // Increased distance
 
             camera.lookAt(player.position);
 
