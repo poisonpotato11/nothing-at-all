@@ -23,11 +23,12 @@
 
         // Create trees
         const trees = [];
-        for (let i = 0; i < 5; i++) {
+        const numberOfTrees = 10; // Set the number of trees
+        for (let i = 0; i < numberOfTrees; i++) {
             const treeGeometry = new THREE.CylinderGeometry(1, 1, 5, 32);
             const treeMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
             const tree = new THREE.Mesh(treeGeometry, treeMaterial);
-            tree.position.set(Math.random() * 10 - 5, 2.5, Math.random() * 10 - 5);
+            tree.position.set(Math.random() * 20 - 10, 2.5, Math.random() * 20 - 10);
             trees.push(tree);
             scene.add(tree);
         }
