@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Game</title>
+    <script src="https://threejs.org/build/three.js"></script>
+</head>
+<body>
+    <script>
+        // Set up the scene
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create a player character
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const player = new THREE.Mesh(geometry, material);
+        scene.add(player);
+
+        // Create trees
+        const trees = [];
+        for (let i = 0; i < 5; i++) {
+            const treeGeometry = new THREE.CylinderGeometry(1, 1, 5, 32);
+            const treeMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
+            const tree = new THREE.Mesh(treeGeometry, treeMaterial);
+            tree.position.set(Math.random() * 10 - 5, 2.5, Math.random() * 10 - 5);
+            trees.push(tree);
+            scene.add(tree);
+        }
+
+        // Set up camera position
+        camera.position.z = 5;
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const newWidth = window.innerWidth;
+            const newHeight = window.innerHeight;
+
+            camera.aspect = newWidth / newHeight;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(newWidth, newHeight);
+        });
+
+        // Handle player movement
+        const playerSpeed = 0.1;
+        const playerMovement = { left: false, right: false, forward: false, backward: false };
+
+        document.addEventListener('keydown', (event) => {
+            switch (event.key) {
+                case 'a':
+                    playerMovement.left = true;
+                    break;
+                case 'd':
+                    playerMovement.right = true;
+                    break;
+                case 'w':
+                    playerMovement.forward = true;
+                    break;
+                case 's':
+                    playerMovement.backward = true;
+                    break;
+            }
+        });
+
+        document.addEventListener('keyup', (event) => {
+            switch (event.key) {
+                case 'a':
+                    playerMovement.left = false;
+                    break;
+                case 'd':
+                    playerMovement.right = false;
+                    break;
+                case 'w':
+                    playerMovement.forward = false;
+                    break;
+                case 's':
+                    playerMovement.backward = false;
+                    break;
+            }
+        });
+
+        // Handle mouse click for "chopping" trees
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        document.addEventListener('mousedown', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+
+            const intersects = raycaster.intersectObjects(trees);
+            if (intersects.length > 0) {
+                const tree = intersects[0].object;
+                scene.remove(tree);
+                // You can add more logic here for handling the chopped tree
+            }
+        });
+
+        // Animation loop
+        const animate = () => {
+            requestAnimationFrame(animate);
+
+            // Update player position based on movement
+            if (playerMovement.left) player.position.x -= playerSpeed;
+            if (playerMovement.right) player.position.x += playerSpeed;
+            if (playerMovement.forward) player.position.z -= playerSpeed;
+            if (playerMovement.backward) player.position.z += playerSpeed;
+
+            renderer.render(scene, camera);
+        };
+
+        animate();
+    </script>
+</body>
+</html>
