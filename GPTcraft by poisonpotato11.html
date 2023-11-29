@@ -37,6 +37,10 @@
         camera.position.y = 5; // Set the camera above the scene
         camera.lookAt(player.position); // Make the camera look at the player
 
+        // Set up ambient light
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // White light with intensity 0.5
+        scene.add(ambientLight);
+
         // Set up skybox with blue-to-green gradient
         const geometrySky = new THREE.SphereGeometry(1000, 32, 32);
         const materialSky = new THREE.MeshBasicMaterial({
