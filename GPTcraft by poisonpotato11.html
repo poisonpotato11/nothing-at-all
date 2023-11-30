@@ -21,36 +21,36 @@
         const player = new THREE.Mesh(geometry, material);
         scene.add(player);
 
-        // Create trees
+        // Create fewer trees
         const trees = [];
-        const numberOfTrees = 10; // Set the number of trees
+        const numberOfTrees = 20; // The number of trees
         for (let i = 0; i < numberOfTrees; i++) {
             const treeGeometry = new THREE.CylinderGeometry(1, 1, 5, 32);
             const treeMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
             const tree = new THREE.Mesh(treeGeometry, treeMaterial);
-            tree.position.set(Math.random() * 40 - 20, 2.5, Math.random() * 40 - 20); // Spread out trees
+            tree.position.set(Math.random() * 20 - 10, 2.5, Math.random() * 20 - 10);
             trees.push(tree);
             scene.add(tree);
         }
 
         // Set up camera position
-        camera.position.y = 5; // Set the camera above the scene
-        camera.lookAt(player.position); // Make the camera look at the player
+        camera.position.y = 5;
+        camera.lookAt(player.position);
 
         // Set up ambient light
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // White light with intensity 0.5
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambientLight);
 
-        // Set up skybox with blue-to-green gradient
-        const geometrySky = new THREE.SphereGeometry(1000, 32, 32);
+        // Set up smaller skybox
+        const geometrySky = new THREE.SphereGeometry(500, 32, 32); // Reduce the size of the skybox
         const materialSky = new THREE.MeshBasicMaterial({
-            color: new THREE.Color(0x87CEEB), // Light blue at the top
+            color: new THREE.Color(0x87CEEB),
             vertexColors: THREE.VertexColors,
-            side: THREE.BackSide // Render on the inside of the sphere
+            side: THREE.BackSide
         });
 
         for (let i = 0; i < geometrySky.faces.length; i += 2) {
-            const color = new THREE.Color(0x87CEEB); // Light blue at the top
+            const color = new THREE.Color(0x87CEEB);
             geometrySky.faces[i].color = color;
             geometrySky.faces[i + 1].color = color;
         }
@@ -137,7 +137,7 @@
 
             // Update camera position to follow the player
             camera.position.x += (player.position.x - camera.position.x) * 0.05;
-            camera.position.z += (player.position.z + 20 - camera.position.z) * 0.05; // Increased distance
+            camera.position.z += (player.position.z + 10 - camera.position.z) * 0.05;
 
             camera.lookAt(player.position);
 
