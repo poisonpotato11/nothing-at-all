@@ -21,14 +21,14 @@
         const player = new THREE.Mesh(geometry, material);
         scene.add(player);
 
-        // Create fewer trees
+        // Create trees
         const trees = [];
-        const numberOfTrees = 20; // The number of trees
+        const numberOfTrees = 20; // Keep the number of trees at 20
         for (let i = 0; i < numberOfTrees; i++) {
             const treeGeometry = new THREE.CylinderGeometry(1, 1, 5, 32);
             const treeMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
             const tree = new THREE.Mesh(treeGeometry, treeMaterial);
-            tree.position.set(Math.random() * 20 - 10, 2.5, Math.random() * 20 - 10);
+            tree.position.set(Math.random() * 40 - 20, 2.5, Math.random() * 40 - 20); // Spread out trees
             trees.push(tree);
             scene.add(tree);
         }
@@ -36,10 +36,6 @@
         // Set up camera position
         camera.position.y = 5;
         camera.lookAt(player.position);
-
-        // Set up ambient light
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(ambientLight);
 
         // Set up smaller skybox
         const geometrySky = new THREE.SphereGeometry(500, 32, 32); // Reduce the size of the skybox
