@@ -15,22 +15,30 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Create a player character
-        const geometry = new THREE.BoxGeometry();
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        const player = new THREE.Mesh(geometry, material);
+        // Create a red player character
+        const geometryPlayer = new THREE.BoxGeometry();
+        const materialPlayer = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Red color
+        const player = new THREE.Mesh(geometryPlayer, materialPlayer);
         scene.add(player);
 
-        // Create trees
+        // Create trees with leaves
         const trees = [];
-        const numberOfTrees = 20; // Keep the number of trees at 20
+        const numberOfTrees = 20;
         for (let i = 0; i < numberOfTrees; i++) {
-            const treeGeometry = new THREE.CylinderGeometry(1, 1, 5, 32);
-            const treeMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
-            const tree = new THREE.Mesh(treeGeometry, treeMaterial);
-            tree.position.set(Math.random() * 40 - 20, 2.5, Math.random() * 40 - 20); // Spread out trees
-            trees.push(tree);
-            scene.add(tree);
+            const trunkGeometry = new THREE.CylinderGeometry(1, 1, 5, 32);
+            const trunkMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
+            const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+
+            const leavesGeometry = new THREE.SphereGeometry(3, 16, 16);
+            const leavesMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Green leaves
+            const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
+
+            trunk.add(leaves); // Add leaves to the top of the trunk
+            leaves.position.y = 8; // Adjust the position of the leaves
+
+            trunk.position.set(Math.random() * 40 - 20, 2.5, Math.random() * 40 - 20);
+            trees.push(trunk);
+            scene.add(trunk);
         }
 
         // Set up camera position
@@ -38,7 +46,7 @@
         camera.lookAt(player.position);
 
         // Set up smaller skybox
-        const geometrySky = new THREE.SphereGeometry(500, 32, 32); // Reduce the size of the skybox
+        const geometrySky = new THREE.SphereGeometry(20, 32, 32); // Reduce the size of the skybox
         const materialSky = new THREE.MeshBasicMaterial({
             color: new THREE.Color(0x87CEEB),
             vertexColors: THREE.VertexColors,
