@@ -8,41 +8,41 @@
 </head>
 <body>
     <script>
-        // Set up the scene
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+        // Set up the first scene with a player and terrain
+        const scene1 = new THREE.Scene();
+        const camera1 = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer1 = new THREE.WebGLRenderer();
+        renderer1.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer1.domElement);
 
         // Create a red player character
         const geometryPlayer = new THREE.BoxGeometry();
         const materialPlayer = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Red color
         const player = new THREE.Mesh(geometryPlayer, materialPlayer);
-        scene.add(player);
+        scene1.add(player);
 
         // Create procedural terrain
         const terrainSize = 30;
         const terrainResolution = 10;
         const terrain = new THREE.Mesh(generateTerrain(terrainSize, terrainResolution), new THREE.MeshBasicMaterial({ color: 0x8B4513 }));
-        scene.add(terrain);
+        scene1.add(terrain);
 
         // Set up camera position
-        camera.position.y = 5;
-        camera.lookAt(player.position);
+        camera1.position.y = 5;
+        camera1.lookAt(player.position);
 
-        // Handle window resize
+        // Handle window resize for the first scene
         window.addEventListener('resize', () => {
             const newWidth = window.innerWidth;
             const newHeight = window.innerHeight;
 
-            camera.aspect = newWidth / newHeight;
-            camera.updateProjectionMatrix();
+            camera1.aspect = newWidth / newHeight;
+            camera1.updateProjectionMatrix();
 
-            renderer.setSize(newWidth, newHeight);
+            renderer1.setSize(newWidth, newHeight);
         });
 
-        // Handle player movement
+        // Handle player movement for the first scene
         const playerSpeed = 0.1;
         const playerMovement = { left: false, right: false, forward: false, backward: false };
 
@@ -80,9 +80,9 @@
             }
         });
 
-        // Animation loop
-        const animate = () => {
-            requestAnimationFrame(animate);
+        // Animation loop for the first scene
+        const animate1 = () => {
+            requestAnimationFrame(animate1);
 
             // Update player position based on movement
             if (playerMovement.left) player.position.x -= playerSpeed;
@@ -91,17 +91,17 @@
             if (playerMovement.backward) player.position.z += playerSpeed;
 
             // Update camera position to follow the player
-            camera.position.x += (player.position.x - camera.position.x) * 0.05;
-            camera.position.z += (player.position.z + 10 - camera.position.z) * 0.05;
+            camera1.position.x += (player.position.x - camera1.position.x) * 0.05;
+            camera1.position.z += (player.position.z + 10 - camera1.position.z) * 0.05;
 
-            camera.lookAt(player.position);
+            camera1.lookAt(player.position);
 
-            renderer.render(scene, camera);
+            renderer1.render(scene1, camera1);
         };
 
-        animate();
+        animate1();
 
-        // Function to generate procedural terrain
+        // Function to generate procedural terrain for the first scene
         function generateTerrain(size, resolution) {
             const geometry = new THREE.Geometry();
 
@@ -135,36 +135,17 @@
 
             return geometry;
         }
-        const width = window.innerWidth, height = window.innerHeight;
 
-// init
+        // Set up the second scene with a rotating cube
+        const scene2 = new THREE.Scene();
+        const camera2 = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 10);
+        camera2.position.z = 1;
 
-const camera = new THREE.PerspectiveCamera( 70, width / height, 0.01, 10 );
-camera.position.z = 1;
+        const geometryCube = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+        const materialCube = new THREE.MeshNormalMaterial();
+        const meshCube = new THREE.Mesh(geometryCube, materialCube);
+        scene2.add(meshCube);
 
-const scene = new THREE.Scene();
-
-const geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
-const material = new THREE.MeshNormalMaterial();
-
-const mesh = new THREE.Mesh( geometry, material );
-scene.add( mesh );
-
-const renderer = new THREE.WebGLRenderer( { antialias: true } );
-renderer.setSize( width, height );
-renderer.setAnimationLoop( animation );
-document.body.appendChild( renderer.domElement );
-
-// animation
-
-function animation( time ) {
-
-	mesh.rotation.x = time / 2000;
-	mesh.rotation.y = time / 1000;
-
-	renderer.render( scene, camera );
-
-}
-    </script>
-</body>
-</html>
+        const renderer2 = new THREE.WebGLRenderer({ antialias: true });
+        renderer2.setSize(window.innerWidth, window.innerHeight);
+        renderer2.set
