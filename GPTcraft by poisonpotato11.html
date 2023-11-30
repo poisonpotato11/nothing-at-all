@@ -21,46 +21,15 @@
         const player = new THREE.Mesh(geometryPlayer, materialPlayer);
         scene.add(player);
 
-        // Create trees with leaves
-        const trees = [];
-        const numberOfTrees = 20;
-        for (let i = 0; i < numberOfTrees; i++) {
-            const trunkGeometry = new THREE.CylinderGeometry(1, 1, 5, 32);
-            const trunkMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
-            const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
-
-            const leavesGeometry = new THREE.SphereGeometry(3, 16, 16);
-            const leavesMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Green leaves
-            const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
-
-            trunk.add(leaves); // Add leaves to the top of the trunk
-            leaves.position.y = 8; // Adjust the position of the leaves
-
-            trunk.position.set(Math.random() * 40 - 20, 2.5, Math.random() * 40 - 20);
-            trees.push(trunk);
-            scene.add(trunk);
-        }
+        // Create procedural terrain
+        const terrainSize = 30;
+        const terrainResolution = 10;
+        const terrain = new THREE.Mesh(generateTerrain(terrainSize, terrainResolution), new THREE.MeshBasicMaterial({ color: 0x8B4513 }));
+        scene.add(terrain);
 
         // Set up camera position
         camera.position.y = 5;
         camera.lookAt(player.position);
-
-        // Set up smaller skybox
-        const geometrySky = new THREE.SphereGeometry(20, 32, 32); // Reduce the size of the skybox
-        const materialSky = new THREE.MeshBasicMaterial({
-            color: new THREE.Color(0x87CEEB),
-            vertexColors: THREE.VertexColors,
-            side: THREE.BackSide
-        });
-
-        for (let i = 0; i < geometrySky.faces.length; i += 2) {
-            const color = new THREE.Color(0x87CEEB);
-            geometrySky.faces[i].color = color;
-            geometrySky.faces[i + 1].color = color;
-        }
-
-        const skybox = new THREE.Mesh(geometrySky, materialSky);
-        scene.add(skybox);
 
         // Handle window resize
         window.addEventListener('resize', () => {
@@ -111,24 +80,6 @@
             }
         });
 
-        // Handle mouse click for "chopping" trees
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-
-        document.addEventListener('mousedown', (event) => {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-            raycaster.setFromCamera(mouse, camera);
-
-            const intersects = raycaster.intersectObjects(trees);
-            if (intersects.length > 0) {
-                const tree = intersects[0].object;
-                scene.remove(tree);
-                // You can add more logic here for handling the chopped tree
-            }
-        });
-
         // Animation loop
         const animate = () => {
             requestAnimationFrame(animate);
@@ -149,6 +100,41 @@
         };
 
         animate();
+
+        // Function to generate procedural terrain
+        function generateTerrain(size, resolution) {
+            const geometry = new THREE.Geometry();
+            
+            for (let i = 0; i < size; i++) {
+                for (let j = 0; j < size; j++) {
+                    const x = i - size / 2;
+                    const y = 0;
+                    const z = j - size / 2;
+
+                    // Simple procedural height generation
+                    const height = Math.sin(i / resolution) * Math.cos(j / resolution) * 5;
+
+                    geometry.vertices.push(new THREE.Vector3(x, height, z));
+                }
+            }
+
+            for (let i = 0; i < size - 1; i++) {
+                for (let j = 0; j < size - 1; j++) {
+                    const a = i + j * size;
+                    const b = (i + 1) + j * size;
+                    const c = i + (j + 1) * size;
+                    const d = (i + 1) + (j + 1) * size;
+
+                    geometry.faces.push(new THREE.Face3(a, b, d));
+                    geometry.faces.push(new THREE.Face3(a, d, c));
+                }
+            }
+
+            geometry.computeFaceNormals();
+            geometry.computeVertexNormals();
+
+            return geometry;
+        }
     </script>
 </body>
 </html>
