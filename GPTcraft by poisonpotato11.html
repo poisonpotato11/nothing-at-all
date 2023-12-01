@@ -3,87 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-        }
+    <script type="module">
+        import * as THREE from 'https://threejs.org/build/three.module.js';
 
-        canvas {
-            display: block;
-        }
-    </style>
-    <title>Minecraft-like Game</title>
-</head>
-<body>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
-    <script>
-        let canvas, ctx;
-        let playerX = 400, playerY = 300;
-        let treeArray = [];
+        let scene, camera, renderer;
+        let player, treeArray;
 
-        window.onload = function () {
-            canvas = document.getElementById("gameCanvas");
-            ctx = canvas.getContext("2d");
+        init();
+        animate();
 
-            // Generate trees
-            generateTrees();
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
 
-            // Set up event listeners
-            window.addEventListener("keydown", handleKeyDown);
+            // Create player
+            const playerGeometry = new THREE.BoxGeometry();
+            const playerMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+            player = new THREE.Mesh(playerGeometry, playerMaterial);
+            scene.add(player);
 
-            // Start the game loop
-            setInterval(gameLoop, 1000 / 60);
-        };
-
-        function generateTrees() {
+            // Create trees
+            treeArray = [];
             for (let i = 0; i < 10; i++) {
-                let treeX = Math.random() * canvas.width;
-                let treeY = Math.random() * canvas.height;
-                treeArray.push({ x: treeX, y: treeY });
+                const treeGeometry = new THREE.BoxGeometry();
+                const treeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+                const tree = new THREE.Mesh(treeGeometry, treeMaterial);
+                tree.position.x = Math.random() * 20 - 10;
+                tree.position.z = Math.random() * 20 - 10;
+                scene.add(tree);
+                treeArray.push(tree);
             }
+
+            // Set up camera position
+            camera.position.z = 5;
         }
 
-        function handleKeyDown(event) {
-            const speed = 5;
-            switch (event.key) {
-                case "ArrowUp":
-                    playerY -= speed;
-                    break;
-                case "ArrowDown":
-                    playerY += speed;
-                    break;
-                case "ArrowLeft":
-                    playerX -= speed;
-                    break;
-                case "ArrowRight":
-                    playerX += speed;
-                    break;
-            }
-        }
+        function animate() {
+            requestAnimationFrame(animate);
 
-        function gameLoop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Player movement
+            const speed = 0.1;
+            if (Key.isDown(Key.LEFT)) player.position.x -= speed;
+            if (Key.isDown(Key.RIGHT)) player.position.x += speed;
+            if (Key.isDown(Key.UP)) player.position.z -= speed;
+            if (Key.isDown(Key.DOWN)) player.position.z += speed;
 
-            ctx.fillStyle = "blue";
-            ctx.fillRect(playerX - 10, playerY - 10, 20, 20);
-
-            ctx.fillStyle = "green";
-            treeArray.forEach(tree => {
-                ctx.fillRect(tree.x - 5, tree.y - 5, 10, 10);
-            });
-
+            // Tree chopping
             checkTreeChopping();
+
+            renderer.render(scene, camera);
         }
 
         function checkTreeChopping() {
             treeArray.forEach((tree, index) => {
-                const distance = Math.sqrt((tree.x - playerX) ** 2 + (tree.y - playerY) ** 2);
-                if (distance < 20) {
+                const distance = player.position.distanceTo(tree.position);
+                if (distance < 1) {
+                    scene.remove(tree);
                     treeArray.splice(index, 1);
                 }
             });
         }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Keyboard input handling
+        const Key = {
+            _pressed: {},
+            LEFT: 37,
+            UP: 38,
+            RIGHT: 39,
+            DOWN: 40,
+
+            isDown: function (keyCode) {
+                return this._pressed[keyCode];
+            },
+
+            onKeyDown: function (event) {
+                this._pressed[event.keyCode] = true;
+            },
+
+            onKeyUp: function (event) {
+                delete this._pressed[event.keyCode];
+            }
+        };
+
+        window.addEventListener('keydown', (event) => { Key.onKeyDown(event); });
+        window.addEventListener('keyup', (event) => { Key.onKeyUp(event); });
     </script>
-</body>
+    <style>
+        body { margin: 0; }
+    </style>
+</head>
+<body></body>
 </html>
