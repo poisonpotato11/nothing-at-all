@@ -3,159 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Game</title>
-    <script src="three.min.js"></script>
-</head>
-<body>
-    <script>
-        // Set up the first scene with a player and terrain
-        const scene1 = new THREE.Scene();
-        const camera1 = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer1 = new THREE.WebGLRenderer();
-        renderer1.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer1.domElement);
-
-        // Create a red player character
-        const geometryPlayer = new THREE.BoxGeometry();
-        const materialPlayer = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Red color
-        const player = new THREE.Mesh(geometryPlayer, materialPlayer);
-        scene1.add(player);
-
-        // Create procedural terrain
-        const terrainSize = 30;
-        const terrainResolution = 10;
-        const terrain = new THREE.Mesh(generateTerrain(terrainSize, terrainResolution), new THREE.MeshBasicMaterial({ color: 0x8B4513 }));
-        scene1.add(terrain);
-
-        // Set up camera position
-        camera1.position.y = 5;
-        camera1.lookAt(player.position);
-
-        // Handle window resize for the first scene
-        window.addEventListener('resize', () => {
-            const newWidth = window.innerWidth;
-            const newHeight = window.innerHeight;
-
-            camera1.aspect = newWidth / newHeight;
-            camera1.updateProjectionMatrix();
-
-            renderer1.setSize(newWidth, newHeight);
-        });
-
-        // Handle player movement for the first scene
-        const playerSpeed = 0.1;
-        const playerMovement = { left: false, right: false, forward: false, backward: false };
-
-        document.addEventListener('keydown', (event) => {
-            switch (event.key) {
-                case 'a':
-                    playerMovement.left = true;
-                    break;
-                case 'd':
-                    playerMovement.right = true;
-                    break;
-                case 'w':
-                    playerMovement.forward = true;
-                    break;
-                case 's':
-                    playerMovement.backward = true;
-                    break;
-            }
-        });
-
-        document.addEventListener('keyup', (event) => {
-            switch (event.key) {
-                case 'a':
-                    playerMovement.left = false;
-                    break;
-                case 'd':
-                    playerMovement.right = false;
-                    break;
-                case 'w':
-                    playerMovement.forward = false;
-                    break;
-                case 's':
-                    playerMovement.backward = false;
-                    break;
-            }
-        });
-
-        // Animation loop for the first scene
-        const animate1 = () => {
-            requestAnimationFrame(animate1);
-
-            // Update player position based on movement
-            if (playerMovement.left) player.position.x -= playerSpeed;
-            if (playerMovement.right) player.position.x += playerSpeed;
-            if (playerMovement.forward) player.position.z -= playerSpeed;
-            if (playerMovement.backward) player.position.z += playerSpeed;
-
-            // Update camera position to follow the player
-            camera1.position.x += (player.position.x - camera1.position.x) * 0.05;
-            camera1.position.z += (player.position.z + 10 - camera1.position.z) * 0.05;
-
-            camera1.lookAt(player.position);
-
-            renderer1.render(scene1, camera1);
-        };
-
-        animate1();
-
-        // Function to generate procedural terrain for the first scene
-        function generateTerrain(size, resolution) {
-            const geometry = new THREE.Geometry();
-
-            for (let i = 0; i < size; i++) {
-                for (let j = 0; j < size; j++) {
-                    const x = i - size / 2;
-                    const y = 0;
-                    const z = j - size / 2;
-
-                    // Simple procedural height generation
-                    const height = Math.sin(i / resolution) * Math.cos(j / resolution) * 5;
-
-                    geometry.vertices.push(new THREE.Vector3(x, height, z));
-                }
-            }
-
-            for (let i = 0; i < size - 1; i++) {
-                for (let j = 0; j < size - 1; j++) {
-                    const a = i + j * size;
-                    const b = (i + 1) + j * size;
-                    const c = i + (j + 1) * size;
-                    const d = (i + 1) + (j + 1) * size;
-
-                    geometry.faces.push(new THREE.Face3(a, b, d));
-                    geometry.faces.push(new THREE.Face3(a, d, c));
-                }
-            }
-
-            geometry.computeFaceNormals();
-            geometry.computeVertexNormals();
-
-            return geometry;
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
         }
 
-        // Set up the second scene with a rotating cube
-        const scene2 = new THREE.Scene();
-        const camera2 = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 10);
-        camera2.position.z = 1;
+        canvas {
+            display: block;
+        }
+    </style>
+    <title>Minecraft-like Game</title>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script>
+        let canvas, ctx;
+        let playerX = 400, playerY = 300;
+        let treeArray = [];
 
-        const geometryCube = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-        const materialCube = new THREE.MeshNormalMaterial();
-        const meshCube = new THREE.Mesh(geometryCube, materialCube);
-        scene2.add(meshCube);
+        window.onload = function () {
+            canvas = document.getElementById("gameCanvas");
+            ctx = canvas.getContext("2d");
 
-        const renderer2 = new THREE.WebGLRenderer({ antialias: true });
-        renderer2.setSize(window.innerWidth, window.innerHeight);
-        renderer2.setAnimationLoop(animation2);
-        document.body.appendChild(renderer2.domElement);
+            // Generate trees
+            generateTrees();
 
-        // Animation loop for the second scene
-        function animation2(time) {
-            meshCube.rotation.x = time / 2000;
-            meshCube.rotation.y = time / 1000;
-            renderer2.render(scene2, camera2);
+            // Set up event listeners
+            window.addEventListener("keydown", handleKeyDown);
+
+            // Start the game loop
+            setInterval(gameLoop, 1000 / 60);
+        };
+
+        function generateTrees() {
+            for (let i = 0; i < 10; i++) {
+                let treeX = Math.random() * canvas.width;
+                let treeY = Math.random() * canvas.height;
+                treeArray.push({ x: treeX, y: treeY });
+            }
+        }
+
+        function handleKeyDown(event) {
+            const speed = 5;
+            switch (event.key) {
+                case "ArrowUp":
+                    playerY -= speed;
+                    break;
+                case "ArrowDown":
+                    playerY += speed;
+                    break;
+                case "ArrowLeft":
+                    playerX -= speed;
+                    break;
+                case "ArrowRight":
+                    playerX += speed;
+                    break;
+            }
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "blue";
+            ctx.fillRect(playerX - 10, playerY - 10, 20, 20);
+
+            ctx.fillStyle = "green";
+            treeArray.forEach(tree => {
+                ctx.fillRect(tree.x - 5, tree.y - 5, 10, 10);
+            });
+
+            checkTreeChopping();
+        }
+
+        function checkTreeChopping() {
+            treeArray.forEach((tree, index) => {
+                const distance = Math.sqrt((tree.x - playerX) ** 2 + (tree.y - playerY) ** 2);
+                if (distance < 20) {
+                    treeArray.splice(index, 1);
+                }
+            });
         }
     </script>
 </body>
